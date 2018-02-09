@@ -21,6 +21,12 @@ module Node = {
   };
 };
 
+Random.self_init();
+
+let numberFound = ref(false);
+
+let mysteryNumber = Random.int(10);
+
 let rl: Node.Readline.interface =
   Node.Readline.createInterface({
     "input": Node.process##stdin,
@@ -32,9 +38,21 @@ external question : (string, Node.callback) => option(string) = "rl.question";
 
 external close : option(unit) => option(string) = "rl.close";
 
-question("Test : ", answer =>
-  switch answer {
-  | None => print_endline("You must write value")
-  | Some(text) => print_endline("ok this text ==> " ++ text)
-  }
-);
+let handleString = (text: string) =>
+  switch (int_of_string(text)) {
+  | exception (Failure("int_of_string")) =>
+    print_endline("This is not a number")
+  | int when int > mysteryNumber => print_endline("It's less !")
+  | int when int < mysteryNumber => print_endline("It's more !")
+  | int => print_endline("Congrats !")
+  };
+
+let rec play = () =>
+  question("Found the mystery number [0-10] : ", answer =>
+    switch answer {
+    | None => print_endline("You must write value")
+    | Some(text) => handleString(text)
+    }
+  );
+
+play();
